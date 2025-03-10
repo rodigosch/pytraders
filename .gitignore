@@ -1,0 +1,8 @@
+# Ignorar diretórios de build
+build/
+dist/
+pytraders.egg-info/
+
+# Ignorar arquivos de cache do Python
+*.pyc
+__pycache__/
