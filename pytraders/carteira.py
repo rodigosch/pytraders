@@ -146,7 +146,7 @@ class Carteira:
   # Funções de controle das posições
   def abrirPosicao(self, dataEntrada, ativo, tipo, volume, precoEntrada, forcaRelativa, stopLoss=np.NaN, stopGain=np.NaN):
     if (type(dataEntrada) == str):
-      dataEntrada = datetime.strptime(dataEntrada, '%Y-%m-%d %H:%M:%S')
+      dataEntrada = datetime.strptime(dataEntrada, '%Y-%m-%d')
 
     # Grava nova posição aberta
     novaPosicao = pd.Series({
