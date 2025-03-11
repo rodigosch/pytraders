@@ -9,12 +9,14 @@ import os
 from selenium import webdriver
 
 class Carteira:
-  def __init__(self, indice_b3, data_inicio, data_fim):
+  def __init__(self, indice_b3=None, data_inicio=None, data_fim=None):
     self.indice_b3 = indice_b3
     self.data_inicio = data_inicio
     self.data_fim = data_fim
-    self.ativos = self.__load_ativos(self.indice_b3, 5)
-    self.cotacoes = self.__load_cotacoes()
+    if indice_b3 is not None:
+      self.ativos = self.__load_ativos(self.indice_b3, 5)
+    if (indice_b3 is not None) and (data_inicio is not None) and (data_fim is not None):
+      self.cotacoes = self.__load_cotacoes()
     self.patrimonio = None
     self.posicoes = None
     self.operacoes = None
