@@ -26,6 +26,30 @@ DATA_FIM = '2024-05-10'
 bt_carteira = Carteira(INDICE_B3, DATA_INICIO, DATA_FIM)
 ```
 
+#### Índices B3
+
+| Código | Índice| Composição|
+|---|---|:---|
+| IBOV | Índice Bovespa|É o principal indicador de desempenho das ações negociadas na B3 e reúne as empresas mais importantes do mercado de capitais brasileiro|
+| IBXX | Índice IBrX 100| 100 ativos de maior negociabilidade e representatividade do mercado de ações brasileiro.|
+| IBXL | Índice IBrX 50|50 ativos de maior negociabilidade e representatividade do mercado de ações brasileiro.|
+| IBRA | Índice Brasil Amplo|O objetivo do IBrA é ser o indicador do desempenho médio das cotações de todos os ativos negociados no mercado a vista (lote-padrão) da B3 que atendam a critérios mínimos de liquidez e presença em pregão, de forma a oferecer uma visão ampla do mercado acionário.|
+| IFNC | Índice Financeiro|ativos de maior negociabilidade e representatividade dos setores de intermediários financeiros, serviços financeiros diversos, previdência e seguros.|
+| ICON | Índice de Consumo|ativos de maior negociabilidade e representatividade dos setores de consumo cíclico, consumo não cíclico e saúde.|
+| IEEX | Índice de Energia Elétrica|ativos de maior negociabilidade e representatividade do setor de energia elétrica.|
+| IFIX | Índice de Fundos Imobiliários |fundos imobiliários negociados nos mercados de bolsa e de balcão organizado da B3.|
+| IFIL | Índice de Fundos Imobiliários de Alta Liquidez |fundos imobiliários mais líquidos negociados nos mercados de bolsa e de balcão organizado da B3.|
+| IMAT | Índice de Materiais Básicos |ativos de maior negociabilidade e representatividade do setor de materiais básicos.|
+| IDIV | Índice Dividendos |ativos que se destacaram em termos de remuneração dos investidores, sob a forma de dividendos e juros sobre o capital próprio.|
+| INDX | Índice do Setor Industrial |ativos de maior negociabilidade e representatividade dos setores da atividade industrial compreendidos por materiais básicos, bens industriais, consumo cíclico, consumo não cíclico, tecnologia da informação e saúde.|
+| IMOB | Índice Imobiliário | ativos de maior negociabilidade e representatividade dos setores da atividade imobiliária compreendidos por exploração de imóveis e construção civil.|
+| MLCX | Índice MidLarge Cap |ativos de uma carteira composta pelas empresas de maior capitalização.|
+| SMLL | Índice Small Cap| empresas de menor capitalização.|
+| UTIL | Índice Utilidade Pública |ativos de maior negociabilidade e representatividade do setor de utilidade pública (energia elétrica, água e saneamento e gás).|
+| IVBX |Índice Valor| empresas bem conceituadas pelos investidores.|
+
+
+
 ### Verifique a lista dos ativos obtidos do site da B3
 ```python
 bt_carteira.ativos
