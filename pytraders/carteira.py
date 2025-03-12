@@ -244,10 +244,20 @@ class Carteira:
     return resultado
 
   def getResultadoPosicoesAbertas(self, data):
-    posicoesAbertas = self.posicoes.loc[self.posicoes['precoSaida'].isna(), ['ativo', 'volume', 'precoEntrada']].copy().reset_index()
-    posicoesAbertas = posicoesAbertas.assign(Close = self.pregoes.loc[data, (posicoesAbertas['ativo'], 'Close')].values)
+    #posicoesAbertas = self.posicoes.loc[self.posicoes['precoSaida'].isna(), ['ativo', 'volume', 'precoEntrada']].copy().reset_index()
+    posicoesAbertas = self.posicoes.loc[self.posicoes['precoSaida'].isna(), ['ativo', 'volume', 'precoEntrada', 'tipo']].copy()
+
+    # Obter os preços de fechamento na data fornecida
+    precos_fechamento = self.pregoes.loc[data, ('Close')]
+
+    # Associar os preços de fechamento aos ativos da posição aberta
+    posicoesAbertas['Close'] = posicoesAbertas['ativo'].map(precos_fechamento)
+
+    #posicoesAbertas = posicoesAbertas.assign(Close = self.pregoes.loc[data, (posicoesAbertas['ativo'], 'Close')].values)
+    # Calcular o resultado com base no tipo de posição (BUY ou SELL)
     posicoesAbertas['resultado'] = posicoesAbertas.apply(
-        lambda row: (row['Close'] - row['precoEntrada']) * row['volume'] if row['tipo'] == 'BUY'
+        lambda row: (row['Close'] - row['precoEntrada']) * row['volume']
+        if row['tipo'] == 'BUY'
         else (row['precoEntrada'] - row['Close']) * row['volume'],
         axis=1
     )
