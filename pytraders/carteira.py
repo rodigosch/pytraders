@@ -176,6 +176,9 @@ class Carteira:
 
 
   def fecharPosicao(self, dataSaida, ativo, precoSaida):
+    if (type(dataSaida) == str):
+      dataSaida = datetime.strptime(dataSaida, '%Y-%m-%d')
+
     posicaoAberta = (self.posicoes['ativo'] == ativo) & self.posicoes['precoSaida'].isna()
     if (self.posicoes.loc[posicaoAberta, 'dataEntrada'].size == 1):
       # Atualiza a posição fechando-a
@@ -265,7 +268,7 @@ class Carteira:
   def fmtMonetario(self, valor):
     return "R$ {:,.2f}".format(valor).replace(",", "X").replace(".", ",").replace("X", ".")
 
-  def get_rentabilidade_media(self, frequencia='YE'):
+  def get_rentabilidade_media(self, frequencia='A'):
     # Rentabilidade média conforme a frequência informada
     capital_agrupado = self.patrimonio.set_index('data', inplace=False)['capital'].resample(frequencia).last()
     capital_inicial_index = pd.Index([self.patrimonio.iloc[0]['data']]).infer_objects()
@@ -277,7 +280,7 @@ class Carteira:
     rentabilidade_media['retorno'] = rentabilidade_media['variacao'].map(lambda x: "{:.2%}".format(x))
     return rentabilidade_media
 
-  def getMetricas(self, frequencia_rentabilidade='YE', taxa_livre_risco_aa=0.10):
+  def getMetricas(self, frequencia_rentabilidade='A', taxa_livre_risco_aa=0.10):
     capitalInicial = self.patrimonio['capital'].iloc[0]
     # Lucro
     lucroLiquidoFin = self.posicoes.resultado.sum()
