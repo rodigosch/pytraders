@@ -273,6 +273,9 @@ class Carteira:
     return "R$ {:,.2f}".format(valor).replace(",", "X").replace(".", ",").replace("X", ".")
 
   def get_rentabilidade_media(self, frequencia='A'):
+    # Certificando que a coluna 'data' é do tipo datetime
+    self.patrimonio['data'] = pd.to_datetime(self.patrimonio['data'])
+
     # Rentabilidade média conforme a frequência informada
     capital_agrupado = self.patrimonio.set_index('data', inplace=False)['capital'].resample(frequencia).last()
     capital_inicial_index = pd.Index([self.patrimonio.iloc[0]['data']]).infer_objects()
