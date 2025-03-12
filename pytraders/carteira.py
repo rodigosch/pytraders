@@ -246,7 +246,11 @@ class Carteira:
   def getResultadoPosicoesAbertas(self, data):
     posicoesAbertas = self.posicoes.loc[self.posicoes['precoSaida'].isna(), ['ativo', 'volume', 'precoEntrada']].copy().reset_index()
     posicoesAbertas = posicoesAbertas.assign(Close = self.pregoes.loc[data, (posicoesAbertas['ativo'], 'Close')].values)
-    posicoesAbertas['resultado'] = (posicoesAbertas['Close'] - posicoesAbertas['precoEntrada']) * posicoesAbertas['volume']
+    posicoesAbertas['resultado'] = posicoesAbertas.apply(
+        lambda row: (row['Close'] - row['precoEntrada']) * row['volume'] if row['tipo'] == 'BUY'
+        else (row['precoEntrada'] - row['Close']) * row['volume'],
+        axis=1
+    )
     return posicoesAbertas['resultado'].sum()
 
   def getCapitalPosicoesAbertas(self, data):
