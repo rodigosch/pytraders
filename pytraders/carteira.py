@@ -248,7 +248,7 @@ class Carteira:
     posicoesAbertas = self.posicoes.loc[self.posicoes['precoSaida'].isna(), ['ativo', 'volume', 'precoEntrada', 'tipo']].copy()
 
     # Obter os preços de fechamento na data fornecida
-    precos_fechamento = self.pregoes.loc[data, ('Close')]
+    precos_fechamento = self.pregoes.loc[data, (posicoesAbertas['ativo'], 'Close')]
 
     # Associar os preços de fechamento aos ativos da posição aberta
     posicoesAbertas['Close'] = posicoesAbertas['ativo'].map(precos_fechamento)
