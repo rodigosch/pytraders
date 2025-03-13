@@ -171,7 +171,10 @@ class Carteira:
         'custo'   : custo_operacional
     })
     self.operacoes = pd.concat([self.operacoes, novaOperacao.to_frame().T], ignore_index=True)
-    self.atualizarPatrimonio(dataEntrada, 'DEC_LIQUIDO', (volume * precoEntrada) + custo_operacional)
+    if tipo == 'BUY':
+      self.atualizarPatrimonio(dataEntrada, 'DEC_LIQUIDO', (volume * precoEntrada) + custo_operacional)
+    else:
+      self.atualizarPatrimonio(dataEntrada, 'INC_LIQUIDO', (volume * precoEntrada) - custo_operacional)
     self.atualizarPatrimonio(dataEntrada, 'DEC_SALDO', custo_operacional)
 
 
@@ -204,7 +207,10 @@ class Carteira:
       })
       self.operacoes = pd.concat([self.operacoes, novaOperacao.to_frame().T], ignore_index=True)
       # Atualiza patrimônio
-      self.atualizarPatrimonio(dataSaida, 'INC_LIQUIDO', (volume * precoSaida) - custo_operacional)
+      if tipo == 'BUY':
+        self.atualizarPatrimonio(dataSaida, 'INC_LIQUIDO', (volume * precoSaida) - custo_operacional)
+      else:
+        self.atualizarPatrimonio(dataSaida, 'DEC_LIQUIDO', (volume * precoSaida) + custo_operacional)
       self.atualizarPatrimonio(dataSaida, 'INC_SALDO', resultado)
       self.atualizarPatrimonio(dataSaida, 'DEC_SALDO', custo_operacional)
     return resultado
@@ -244,7 +250,6 @@ class Carteira:
     return resultado
 
   def getResultadoPosicoesAbertas(self, data):
-    #posicoesAbertas = self.posicoes.loc[self.posicoes['precoSaida'].isna(), ['ativo', 'volume', 'precoEntrada']].copy().reset_index()
     posicoesAbertas = self.posicoes.loc[self.posicoes['precoSaida'].isna(), ['ativo', 'volume', 'precoEntrada', 'tipo']].copy()
 
     # Obter os preços de fechamento na data fornecida
