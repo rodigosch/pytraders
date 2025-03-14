@@ -9,14 +9,10 @@ import os
 from selenium import webdriver
 
 class Carteira:
-  def __init__(self, indice_b3=None, data_inicio=None, data_fim=None):
+  def __init__(self, indice_b3, data_inicio, data_fim):
     self.indice_b3 = indice_b3
     self.data_inicio = data_inicio
     self.data_fim = data_fim
-    if indice_b3 is not None:
-      self.ativos = self.__load_ativos(self.indice_b3, 5)
-    if (indice_b3 is not None) and (data_inicio is not None) and (data_fim is not None):
-      self.cotacoes = self.__load_cotacoes()
     self.patrimonio = None
     self.posicoes = None
     self.operacoes = None
@@ -46,7 +42,7 @@ class Carteira:
     self.taxa_custo_operacional = taxa_custo_operacional
 
   # Recebe um índice B3 e retorna um dataframe dos ativos que o compõe
-  def __load_ativos(self, indice_b3, espera=8):
+  def __load_ativos(self, espera=8):
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
@@ -58,7 +54,6 @@ class Carteira:
     #wd.get("https://www.google.com")
     #print(wd.page_source)  # results
     # divs = wd.find_elements_by_css_selector('div')
-    self.indice_b3 = indice_b3
     url = f'https://sistemaswebb3-listados.b3.com.br/indexPage/day/{self.indice_b3.upper()}?language=pt-br'
     wd.get(url)
     sleep(espera)
@@ -77,6 +72,14 @@ class Carteira:
       return pd.read_csv(arquivo_csv, sep=';', encoding='ISO-8859-1', skipfooter=2, engine='python', thousands='.', decimal=',', header=1, index_col=False)
     else:
       raise FileNotFoundError("Nenhum arquivo CSV encontrado no diretório '/content'.")
+
+  def ler_tickers(self):
+    self.ativos = self.__load_ativos(5)
+
+  def reler_tickers_e_cotacoes(self, indice_b3):
+    self.indice_b3 = indice_b3
+    self.ativos = self.__load_ativos(5)
+    self.cotacoes = self.__load_cotacoes()
 
   def __load_cotacoes(self):
     # Gera códigos de ativos no padrão yfinance
@@ -97,7 +100,10 @@ class Carteira:
     # Renomeia as colunas com códigos de ativo B3
     return cotacoes.rename(columns = dict_tickers)
   
-  def reload_cotacoes(self, data_inicio, data_fim):
+  def ler_cotacoes(self):
+    self.cotacoes = self.__load_cotacoes()
+
+  def reler_cotacoes(self, data_inicio, data_fim):
     self.data_inicio = data_inicio
     self.data_fim = data_fim
     self.cotacoes = self.__load_cotacoes()    
