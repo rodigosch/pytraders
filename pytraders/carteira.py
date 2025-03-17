@@ -179,8 +179,8 @@ class Carteira:
     self.operacoes = pd.concat([self.operacoes, novaOperacao.to_frame().T], ignore_index=True)
     if tipo == 'BUY':
       self.atualizarPatrimonio(dataEntrada, 'DEC_LIQUIDO', (volume * precoEntrada) + custo_operacional)
-    else:
-      self.atualizarPatrimonio(dataEntrada, 'INC_LIQUIDO', (volume * precoEntrada) - custo_operacional)
+    #else:
+      #self.atualizarPatrimonio(dataEntrada, 'INC_LIQUIDO', (volume * precoEntrada) - custo_operacional)
     self.atualizarPatrimonio(dataEntrada, 'DEC_SALDO', custo_operacional)
 
 
@@ -215,8 +215,8 @@ class Carteira:
       # Atualiza patrimônio
       if tipo == 'BUY':
         self.atualizarPatrimonio(dataSaida, 'INC_LIQUIDO', (volume * precoSaida) - custo_operacional)
-      else:
-        self.atualizarPatrimonio(dataSaida, 'DEC_LIQUIDO', (volume * precoSaida) + custo_operacional)
+      #else:
+        #self.atualizarPatrimonio(dataSaida, 'DEC_LIQUIDO', (volume * precoSaida) + custo_operacional)
       self.atualizarPatrimonio(dataSaida, 'INC_SALDO', resultado)
       self.atualizarPatrimonio(dataSaida, 'DEC_SALDO', custo_operacional)
     return resultado
