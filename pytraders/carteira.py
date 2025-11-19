@@ -8,10 +8,10 @@ from selenium.webdriver.common.by import By
 import os
 from selenium import webdriver
 import chromedriver_autoinstaller
-chromedriver_autoinstaller.install()
 
 class Carteira:
   def __init__(self, indice_b3, data_inicio, data_fim):
+    chromedriver_autoinstaller.install()
     self.indice_b3 = indice_b3
     self.data_inicio = data_inicio
     self.data_fim = data_fim
