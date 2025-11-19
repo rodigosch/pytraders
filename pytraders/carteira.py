@@ -43,11 +43,20 @@ class Carteira:
 
   # Recebe um índice B3 e retorna um dataframe dos ativos que o compõe
   def __load_ativos(self, espera=8):
+    # 1. Define o diretório atual como local de download
+    download_dir = os.getcwd() # No Colab, isso geralmente é '/content'
+
+    # 2. Configura as opções
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    prefs = {"download.default_directory": "/content", "safebrowsing.enabled": "false"}
+    prefs = {
+        "download.default_directory": download_dir,  # Onde salvar
+        "download.prompt_for_download": False,       # Não perguntar onde salvar
+        "download.directory_upgrade": True,
+        "safebrowsing.enabled": True                 # Necessário para alguns tipos de arquivo
+    }
     options.add_experimental_option("prefs", prefs)
     # open it, go to a website, and get results
     wd = webdriver.Chrome(options=options)
