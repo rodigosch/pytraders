@@ -150,7 +150,7 @@ class Carteira:
     return True if (liquidoAtual >= valor) else False
 
   # Funções de controle das posições
-  def abrirPosicao(self, dataEntrada, ativo, tipo, volume, precoEntrada, forcaRelativa, stopLoss=np.NaN, stopGain=np.NaN):
+  def abrirPosicao(self, dataEntrada, ativo, tipo, volume, precoEntrada, forcaRelativa, stopLoss=np.nan, stopGain=np.nan):
     if (type(dataEntrada) == str):
       dataEntrada = datetime.strptime(dataEntrada, '%Y-%m-%d')
 
@@ -241,7 +241,7 @@ class Carteira:
 
   def getTipoPosicaoAberta(self, ativo):
     posicoesAbertas = self.posicoes.loc[(self.posicoes['ativo'] == ativo) & self.posicoes['precoSaida'].isna(), 'tipo']
-    return posicoesAbertas.values[0] if posicoesAbertas.size == 1 else np.NaN
+    return posicoesAbertas.values[0] if posicoesAbertas.size == 1 else np.nan
 
   def getResultadoPosicaoAberta(self, ativo, precoAtual):
     posicaoAberta = (self.posicoes['ativo'] == ativo) & self.posicoes['precoSaida'].isna()
