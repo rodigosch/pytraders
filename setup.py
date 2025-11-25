@@ -12,7 +12,7 @@ setup(
         "selenium",
         #"chromium-chromedriver",
         "chromedriver-autoinstaller",
-        "yfinance==0.2.54",
+        "yfinance==0.2.66",
         "ta"
     ],
     classifiers=[
