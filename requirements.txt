@@ -1,5 +1,5 @@
 pandas
 selenium
 chromium-chromedriver
-yfinance==0.2.54
+yfinance==0.2.57
 ta
