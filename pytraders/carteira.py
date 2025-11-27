@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 import os
 from selenium import webdriver
 import chromedriver_autoinstaller
+from collections import deque
 
 class Carteira:
   def __init__(self, indice_b3, data_inicio, data_fim):
