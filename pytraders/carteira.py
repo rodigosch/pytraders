@@ -161,7 +161,7 @@ class Carteira:
     self.posicoes["stopLoss"] = self.posicoes["stopLoss"].astype(float).round(casas)
 
   # Funções de controle da evolução do patrimônio
-  def atualizarPatrimonio(self, data, operacao, valor, posicao_filtrada=False):
+  def atualizarPatrimonio(self, data, operacao, valor, somente_paper_trade=False):
     liquidoAtual = self.patrimonio['liquido'].iloc[-1] if (self.patrimonio.liquido.size > 0) else 0
     saldoAtual = self.patrimonio['saldo'].iloc[-1] if (self.patrimonio.saldo.size > 0) else 0
     capitalAtual = self.patrimonio['capital'].iloc[-1] if (self.patrimonio.capital.size > 0) else 0
@@ -180,7 +180,7 @@ class Carteira:
     elif (operacao == 'INC_CAPITAL'): 
       capitalAtual = saldoAtual + valor
     
-    if (posicao_filtrada):
+    if (somente_paper_trade):
       atualizacao = pd.Series({
           'data': data,
           'liquido': liquidoAtual,
@@ -223,7 +223,7 @@ class Carteira:
         'stopLoss'     : stopLoss,
         'stopGain'     : stopGain
     })
-    self.posicoes = pd.concat([self.posicoes, novaPosicao.to_frame().T], ignore_index=True)
+    
     custo_operacional = volume * precoEntrada * self.taxa_custo_operacional
     novaOperacao = pd.Series({
         'data'    : dataEntrada,
@@ -235,16 +235,17 @@ class Carteira:
         'custo'   : custo_operacional
     })
     
-    posicao_filtrada = self.filtrar_operacao_curva_capital and self.curva_capital_acima_media_movel()
+    somente_paper_trade = self.filtrar_operacao_curva_capital and not self.curva_capital_acima_media_movel()
     
-    if (posicao_filtrada):
+    if (somente_paper_trade):
+      self.posicoes = pd.concat([self.posicoes, novaPosicao.to_frame().T], ignore_index=True)
       self.operacoes = pd.concat([self.operacoes, novaOperacao.to_frame().T], ignore_index=True)
 
     if tipo == 'BUY':
-      self.atualizarPatrimonio(dataEntrada, 'DEC_LIQUIDO', (volume * precoEntrada) + custo_operacional, posicao_filtrada)
+      self.atualizarPatrimonio(dataEntrada, 'DEC_LIQUIDO', (volume * precoEntrada) + custo_operacional, somente_paper_trade)
     #else:
-      #self.atualizarPatrimonio(dataEntrada, 'INC_LIQUIDO', (volume * precoEntrada) - custo_operacional, posicao_filtrada)
-    self.atualizarPatrimonio(dataEntrada, 'DEC_SALDO', custo_operacional, posicao_filtrada)
+      #self.atualizarPatrimonio(dataEntrada, 'INC_LIQUIDO', (volume * precoEntrada) - custo_operacional, somente_paper_trade)
+    self.atualizarPatrimonio(dataEntrada, 'DEC_SALDO', custo_operacional, somente_paper_trade)
 
 
   def fecharPosicao(self, dataSaida, ativo, precoSaida):
