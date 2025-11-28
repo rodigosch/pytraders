@@ -457,7 +457,7 @@ class Carteira:
     plt.grid(True)  # Adicionar grade
     plt.show()
 
-  def plotar_curva_capital_diario(self, plot_saldo=True, plot_capital=True, plot_liquido=True):
+  def plotar_curva_capital_diario(self):
     plt.figure(figsize=(20,10))
     plt.plot(self.resumo_diario.index, self.resumo_diario['capital'], label='Capital Diário')
     plt.plot(self.resumo_diario.index, self.resumo_diario['media_movel_5d'], label='MM5 Capital', linestyle='--')

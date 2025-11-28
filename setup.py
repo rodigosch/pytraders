@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="pytraders",
-    version="0.0.2",
+    version="0.0.3",
     description="Pacote para operações de backtest de carteira em índices da B3",
     author="Rodrigo Schneider",
     author_email="schneider.rs@gmail.com",
