@@ -378,7 +378,7 @@ class Carteira:
 
     # Cálculo do Índice de Sharpe para dados diários
     retornos_diarios = self.posicoes.groupby("dataEntrada").agg(total_retorno=("retorno", "sum")).reset_index()
-    sharpe = calcular_sharpe(retornos_diarios, 'total_retorno', taxa_livre_risco_aa, freq='diária')
+    sharpe = self.__calcular_sharpe(retornos_diarios, 'total_retorno', taxa_livre_risco_aa, freq='diária')
 
     # Apresentação dos resultados
     print('Ativos operados     :', self.indice_b3)
@@ -438,7 +438,7 @@ class Carteira:
     plt.grid(True)  # Adicionar grade
     plt.show()
 
-  def calcular_sharpe(df, coluna_retorno, taxa_livre_risco_anual, freq='diária'):
+  def __calcular_sharpe(self, df, coluna_retorno, taxa_livre_risco_anual, freq='diária'):
       """
       Calcula o Índice de Sharpe para um conjunto de retornos.
       
