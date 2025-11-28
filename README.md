@@ -223,3 +223,14 @@ DataTable(rentabilidade_media[['capital', 'retorno']])
 ```python
 bt_carteira.plotar_curva_capital(plot_liquido=False) # Opção de plotar ou não a linha do saldo líquido ao longo do tempo
 ```
+
+## Desenvolvimento
+
+### Build de nova versão
+
+* Atualize a versão no setup.py se quiser
+´´´
+cd /caminho/para/pytraders
+python setup.py bdist_wheel
+´´´
+* O arquivo estará em: dist/pytraders-X.X.X-py3-none-any.whl
