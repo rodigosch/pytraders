@@ -22,6 +22,7 @@ class Carteira:
     self.diversificacao_maxima = None
     self.reinvestir_lucros = None
     self.custo_operacional = None
+    self.filtrar_operacao_curva_capital = False
 
   def __init_carteira(self):
     # Dataframe da evolução do patrimônio
@@ -34,19 +35,20 @@ class Carteira:
     # Dataframe das operações
     operacoes = pd.DataFrame(columns=['data', 'ativo', 'tipo', 'direcao', 'volume', 'preco', 'custo'])
 
-    # NOVO: Dataframe de Resumo Diário (Curva de Capital consolidada)
+    # Dataframe de Resumo Diário (Curva de Capital consolidada)
     # Index será a Data (DatetimeIndex) para facilitar o resampling e upsert
     resumo_diario = pd.DataFrame(columns=['saldo', 'capital', 'media_movel_5d'])
     resumo_diario.index.name = 'data'
     return patrimonio, posicoes, operacoes, resumo_diario
   
-  def setup_backtest(self, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes):
+  def setup_backtest(self, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital=False):
     self.patrimonio, self.posicoes, self.operacoes, self.resumo_diario = self.__init_carteira()
     self.atualizarPatrimonio(pd.to_datetime(self.data_inicio), 'DEPOSIT', capital_inicial)
     self.pregoes = pregoes
     self.diversificacao_maxima = diversificacao_maxima
     self.reinvestir_lucros = reinvestir_lucros
     self.taxa_custo_operacional = taxa_custo_operacional
+    self.filtrar_operacao_curva_capital = filtrar_operacao_curva_capital
 
   # Recebe um índice B3 e retorna um dataframe dos ativos que o compõe
   def __load_ativos(self, espera=8):
@@ -159,7 +161,7 @@ class Carteira:
     self.posicoes["stopLoss"] = self.posicoes["stopLoss"].astype(float).round(casas)
 
   # Funções de controle da evolução do patrimônio
-  def atualizarPatrimonio(self, data, operacao, valor):
+  def atualizarPatrimonio(self, data, operacao, valor, posicao_filtrada=False):
     liquidoAtual = self.patrimonio['liquido'].iloc[-1] if (self.patrimonio.liquido.size > 0) else 0
     saldoAtual = self.patrimonio['saldo'].iloc[-1] if (self.patrimonio.saldo.size > 0) else 0
     capitalAtual = self.patrimonio['capital'].iloc[-1] if (self.patrimonio.capital.size > 0) else 0
@@ -177,18 +179,30 @@ class Carteira:
       saldoAtual = saldoAtual - valor
     elif (operacao == 'INC_CAPITAL'): 
       capitalAtual = saldoAtual + valor
-    atualizacao = pd.Series({
-        'data': data,
-        'liquido': liquidoAtual,
-        'saldo': saldoAtual,
-        'capital': capitalAtual
-    })
-    self.patrimonio = pd.concat([self.patrimonio, atualizacao.to_frame().T], ignore_index=True)
+    
+    if (posicao_filtrada):
+      atualizacao = pd.Series({
+          'data': data,
+          'liquido': liquidoAtual,
+          'saldo': saldoAtual,
+          'capital': capitalAtual
+      })
+      self.patrimonio = pd.concat([self.patrimonio, atualizacao.to_frame().T], ignore_index=True)
 
-    # CHAMADA DA NOVA FUNÇÃO
     # Alimenta o dataframe diário consolidado após o registro do evento
     self.__atualizar_resumo_diario(data, saldoAtual, capitalAtual)
  
+  def curva_capital_acima_media_movel(self):
+    if self.resumo_diario.empty:
+      return True
+    else:
+      ultima_linha = self.resumo_diario.iloc[-1]
+      capital_atual = ultima_linha['capital']
+      media_movel_5d = ultima_linha['media_movel_5d']
+      if pd.isna(media_movel_5d):
+        return True
+      return capital_atual >= media_movel_5d
+    
   def temSaldoLiquido(self, valor):
     liquidoAtual = self.patrimonio['liquido'].iloc[-1] if (self.patrimonio.liquido.size > 0) else 0
     return True if (liquidoAtual >= valor) else False
@@ -220,12 +234,17 @@ class Carteira:
         'preco'   : precoEntrada,
         'custo'   : custo_operacional
     })
-    self.operacoes = pd.concat([self.operacoes, novaOperacao.to_frame().T], ignore_index=True)
+    
+    posicao_filtrada = self.filtrar_operacao_curva_capital and self.curva_capital_acima_media_movel()
+    
+    if (posicao_filtrada):
+      self.operacoes = pd.concat([self.operacoes, novaOperacao.to_frame().T], ignore_index=True)
+
     if tipo == 'BUY':
-      self.atualizarPatrimonio(dataEntrada, 'DEC_LIQUIDO', (volume * precoEntrada) + custo_operacional)
+      self.atualizarPatrimonio(dataEntrada, 'DEC_LIQUIDO', (volume * precoEntrada) + custo_operacional, posicao_filtrada)
     #else:
-      #self.atualizarPatrimonio(dataEntrada, 'INC_LIQUIDO', (volume * precoEntrada) - custo_operacional)
-    self.atualizarPatrimonio(dataEntrada, 'DEC_SALDO', custo_operacional)
+      #self.atualizarPatrimonio(dataEntrada, 'INC_LIQUIDO', (volume * precoEntrada) - custo_operacional, posicao_filtrada)
+    self.atualizarPatrimonio(dataEntrada, 'DEC_SALDO', custo_operacional, posicao_filtrada)
 
 
   def fecharPosicao(self, dataSaida, ativo, precoSaida):
