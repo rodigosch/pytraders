@@ -19,9 +19,9 @@ class Carteira:
 
 
     def setup_backtest(self, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital=False):
-        self.book_execucao = TradingBook(self.data_inicio, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital)
+        self.book_execucao = TradingBook(self.indice_b3, self.data_inicio, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital)
         if (self.filtrar_operacao_curva_capital):
-            self.book_referencia = TradingBook(self.data_inicio, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital)
+            self.book_referencia = TradingBook(self.indice_b3, self.data_inicio, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital)
 
 
     # Recebe um índice B3 e retorna um dataframe dos ativos que o compõe
