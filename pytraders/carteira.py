@@ -100,3 +100,8 @@ class Carteira:
         self.data_inicio = data_inicio
         self.data_fim = data_fim
         self.cotacoes = self.__load_cotacoes()
+
+    def atualizarPatrimonio(self, data, operacao, valor):
+        self.book_execucao.atualizarPatrimonio(data, operacao, valor)
+        if (self.filtrar_operacao_curva_capital):
+            self.book_referencia.atualizarPatrimonio(data, operacao, valor)
