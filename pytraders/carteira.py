@@ -108,6 +108,12 @@ class Carteira:
         if (self.filtrar_operacao_curva_capital):
             self.book_referencia.atualizarPatrimonio(data, operacao, valor)
 
+    def getPregoes(self):
+        if (self.filtrar_operacao_curva_capital):
+            return self.book_referencia.pregoes
+        else:
+            return self.book_execucao.pregoes
+
     def temPosicaoAberta(self, ativo):
         return self.book_execucao.temPosicaoAberta(ativo)
     
