@@ -18,7 +18,6 @@ class TradingBook:
         # saldo: demonstra evolução do capital considerando somente o saldo de posições fechadas
         # capital: demonstra evolução do capital considerando também a cotação das posições abertas
         self.patrimonio = pd.DataFrame(columns=['data', 'liquido', 'saldo', 'capital'])
-        self.atualizarPatrimonio(pd.to_datetime(self.data_inicio), 'DEPOSIT', capital_inicial)
         # Dataframe das posições
         self.posicoes = pd.DataFrame(columns=('ativo', 'tipo', 'volume', 'dataEntrada', 'precoEntrada', 'dataSaida', 'precoSaida', 'resultado', 'retorno', 'forcaRelativa', 'stopLoss', 'stopGain'))
         # Dataframe das operações
@@ -27,6 +26,7 @@ class TradingBook:
         # Index será a Data (DatetimeIndex) para facilitar o resampling e upsert
         self.capital_diario = pd.DataFrame(columns=['saldo', 'capital', 'media_movel_5d'])
         self.capital_diario.index.name = 'data'
+        self.atualizarPatrimonio(pd.to_datetime(self.data_inicio), 'DEPOSIT', capital_inicial)
 
     # Nova função privada para gerenciar a lógica de média móvel e dia único
     def __atualizar_capital_diario(self, data, saldo, capital):
