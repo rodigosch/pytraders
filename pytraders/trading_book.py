@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 class TradingBook:
-    def __init__(self, indice_b3, data_inicio, data_fim, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital=False):
+    def __init__(self, indice_b3, data_inicio, data_fim, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital=False, sma_curva_capital=5):
         self.indice_b3 = indice_b3
         self.data_inicio = data_inicio
         self.data_fim = data_fim
@@ -13,6 +13,7 @@ class TradingBook:
         self.taxa_custo_operacional = taxa_custo_operacional
         self.pregoes = pregoes
         self.filtrar_operacao_curva_capital = filtrar_operacao_curva_capital
+        self.sma_curva_capital = sma_curva_capital
 
         # Dataframe da evolução do patrimônio
         # liquido: valor em conta corrente disponível para compras
@@ -40,9 +41,9 @@ class TradingBook:
         self.capital_diario.loc[data_normalizada, 'capital'] = float(capital)
 
         # Lógica da Média Móvel Simples de 5 períodos (SMA 5)
-        # Pegamos as últimas 5 linhas da coluna capital.
+        # Pegamos as últimas 5 linhas da coluna saldo.
         # Como acabamos de atualizar a linha atual (data_normalizada), ela já está incluída no tail(5)
-        window = self.capital_diario['capital'].tail(5)
+        window = self.capital_diario['saldo'].tail(self.sma_curva_capital)
 
         if len(window) == 5:
             media_movel = window.mean()
