@@ -4,9 +4,10 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 class TradingBook:
-    def __init__(self, indice_b3, data_inicio, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital=False):
+    def __init__(self, indice_b3, data_inicio, data_fim, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital=False):
         self.indice_b3 = indice_b3
         self.data_inicio = data_inicio
+        self.data_fim = data_fim
         self.diversificacao_maxima = diversificacao_maxima
         self.reinvestir_lucros = reinvestir_lucros
         self.taxa_custo_operacional = taxa_custo_operacional
