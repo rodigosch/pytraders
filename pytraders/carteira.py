@@ -115,26 +115,11 @@ class Carteira:
             return self.book_execucao.pregoes
 
     def temPosicaoAberta(self, ativo):
-        return self.book_execucao.temPosicaoAberta(ativo)
-    
-    def getStopLossPosicaoAberta(self, ativo):
-        return self.book_execucao.getStopLossPosicaoAberta(ativo)
-    
-    def getStopGainPosicaoAberta(self, ativo):
-        return self.book_execucao.getStopGainPosicaoAberta(ativo)
-    
-    def getTipoPosicaoAberta(self, ativo):
-        return self.book_execucao.getTipoPosicaoAberta(ativo)
-    
-    def getVolumeOperacao(self, preco):
-        return self.book_execucao.getVolumeOperacao(preco)
-
-    def temSaldoLiquido(self, valor):
-        return self.book_execucao.temSaldoLiquido(valor)
-    
-    def getQuantidadePosicoesAbertas(self):
-        return self.book_execucao.getQuantidadePosicoesAbertas()
-
+        if (self.filtrar_operacao_curva_capital):
+            return self.book_referencia.temPosicaoAberta(ativo)
+        else:
+            return self.book_execucao.temPosicaoAberta(ativo)
+        
     def abrirPosicao(self, dataEntrada, ativo, tipo, volume, precoEntrada, forcaRelativa, stopLoss=np.nan, stopGain=np.nan):
         if (self.filtrar_operacao_curva_capital):
             self.book_referencia.abrirPosicao(dataEntrada, ativo, tipo, volume, precoEntrada, forcaRelativa, stopLoss, stopGain)
@@ -144,12 +129,51 @@ class Carteira:
     def fecharPosicao(self, dataSaida, ativo, precoSaida):
         if (self.book_execucao.temPosicaoAberta(ativo)):
             self.book_execucao.fecharPosicao(dataSaida, ativo, precoSaida)
-        if (self.book_referencia.temPosicaoAberta(ativo)):
+        if (self.filtrar_operacao_curva_capital):
             self.book_referencia.fecharPosicao(dataSaida, ativo, precoSaida)
 
+    def getStopLossPosicaoAberta(self, ativo):
+        if (self.filtrar_operacao_curva_capital):
+            return self.book_referencia.getStopLossPosicaoAberta(ativo)
+        else:
+            return self.book_execucao.getStopLossPosicaoAberta(ativo)
+        
+    def getStopGainPosicaoAberta(self, ativo):
+        if (self.filtrar_operacao_curva_capital):
+            return self.book_referencia.getStopGainPosicaoAberta(ativo)
+        else:
+            return self.book_execucao.getStopGainPosicaoAberta(ativo)
+            
+    def getTipoPosicaoAberta(self, ativo):
+        if (self.filtrar_operacao_curva_capital):
+            return self.book_referencia.getTipoPosicaoAberta(ativo)
+        else:
+            return self.book_execucao.getTipoPosicaoAberta(ativo)
+        
+    def getVolumeOperacao(self, preco):
+        if (self.filtrar_operacao_curva_capital):
+            return self.book_referencia.getVolumeOperacao(preco)
+        else:
+            return self.book_execucao.getVolumeOperacao(preco)
+        
+    def temSaldoLiquido(self, valor):
+        if (self.filtrar_operacao_curva_capital):
+            return self.book_referencia.temSaldoLiquido(valor)
+        else:
+            return self.book_execucao.temSaldoLiquido(valor)
+            
+    def getQuantidadePosicoesAbertas(self):
+        if (self.filtrar_operacao_curva_capital):
+            return self.book_referencia.getQuantidadePosicoesAbertas()
+        else:
+            return self.book_execucao.getQuantidadePosicoesAbertas()
+        
     def getResultadoPosicoesAbertas(self, data):
-        return self.book_execucao.getResultadoPosicoesAbertas(data)
-    
+        if (self.filtrar_operacao_curva_capital):
+            return self.book_referencia.getResultadoPosicoesAbertas(data)
+        else:
+            return self.book_execucao.getResultadoPosicoesAbertas(data)
+           
     def arredondar_casas_decimais(self, casas=2):
         self.book_execucao.arredondar_casas_decimais(casas)
         if (self.filtrar_operacao_curva_capital):
