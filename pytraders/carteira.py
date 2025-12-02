@@ -138,7 +138,7 @@ class Carteira:
     def fecharPosicao(self, dataSaida, ativo, precoSaida):
         if (self.book_execucao.temPosicaoAberta(ativo)):
             self.book_execucao.fecharPosicao(dataSaida, ativo, precoSaida)
-        if (self.filtrar_operacao_curva_capital):
+        if (self.book_referencia.temPosicaoAberta(ativo)):
             self.book_referencia.fecharPosicao(dataSaida, ativo, precoSaida)
 
     def getResultadoPosicoesAbertas(self, data):
