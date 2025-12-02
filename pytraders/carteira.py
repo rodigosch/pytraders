@@ -120,11 +120,6 @@ class Carteira:
     def getTipoPosicaoAberta(self, ativo):
         return self.book_execucao.getTipoPosicaoAberta(ativo)
     
-    def fecharPosicao(self, dataSaida, ativo, precoSaida):
-        self.book_execucao.fecharPosicao(dataSaida, ativo, precoSaida)
-        if (self.filtrar_operacao_curva_capital):
-            self.book_referencia.fecharPosicao(dataSaida, ativo, precoSaida)
-
     def getVolumeOperacao(self, preco):
         return self.book_execucao.getVolumeOperacao(preco)
 
@@ -139,6 +134,12 @@ class Carteira:
             self.book_referencia.abrirPosicao(dataEntrada, ativo, tipo, volume, precoEntrada, forcaRelativa, stopLoss, stopGain)
         if ((self.filtrar_operacao_curva_capital and self.book_referencia.curva_capital_acima_media_movel()) or not self.filtrar_operacao_curva_capital):
             self.book_execucao.abrirPosicao(dataEntrada, ativo, tipo, volume, precoEntrada, forcaRelativa, stopLoss, stopGain)
+
+    def fecharPosicao(self, dataSaida, ativo, precoSaida):
+        if (self.book_execucao.temPosicaoAberta(ativo)):
+            self.book_execucao.fecharPosicao(dataSaida, ativo, precoSaida)
+        if (self.filtrar_operacao_curva_capital):
+            self.book_referencia.fecharPosicao(dataSaida, ativo, precoSaida)
 
     def getResultadoPosicoesAbertas(self, data):
         return self.book_execucao.getResultadoPosicoesAbertas(data)
