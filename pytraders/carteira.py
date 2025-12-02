@@ -1,5 +1,6 @@
 import yfinance as yf
 import pandas as pd
+import numpy as np
 from time import sleep
 from selenium.webdriver.common.by import By
 import os
@@ -105,3 +106,43 @@ class Carteira:
         self.book_execucao.atualizarPatrimonio(data, operacao, valor)
         if (self.filtrar_operacao_curva_capital):
             self.book_referencia.atualizarPatrimonio(data, operacao, valor)
+
+    def temPosicaoAberta(self, ativo):
+        return self.book_execucao.temPosicaoAberta(ativo)
+    
+    def getStopLossPosicaoAberta(self, ativo):
+        return self.book_execucao.getStopLossPosicaoAberta(ativo)
+    
+    def getStopGainPosicaoAberta(self, ativo):
+        return self.book_execucao.getStopGainPosicaoAberta(ativo)
+    
+    def getTipoPosicaoAberta(self, ativo):
+        return self.book_execucao.getTipoPosicaoAberta(ativo)
+    
+    def fecharPosicao(self, dataSaida, ativo, precoSaida):
+        self.book_execucao.fecharPosicao(dataSaida, ativo, precoSaida)
+        if (self.filtrar_operacao_curva_capital):
+            self.book_referencia.fecharPosicao(dataSaida, ativo, precoSaida)
+
+    def getVolumeOperacao(self, preco):
+        return self.book_execucao.getVolumeOperacao(preco)
+
+    def temSaldoLiquido(self, valor):
+        return self.book_execucao.temSaldoLiquido(valor)
+    
+    def getQuantidadePosicoesAbertas(self):
+        return self.book_execucao.getQuantidadePosicoesAbertas()
+
+    def abrirPosicao(self, dataEntrada, ativo, tipo, volume, precoEntrada, forcaRelativa, stopLoss=np.nan, stopGain=np.nan):
+        if (self.filtrar_operacao_curva_capital):
+            self.book_referencia.abrirPosicao(dataEntrada, ativo, tipo, volume, precoEntrada, forcaRelativa, stopLoss, stopGain)
+        if ((self.filtrar_operacao_curva_capital and self.book_referencia.curva_capital_acima_media_movel()) or not self.filtrar_operacao_curva_capital):
+            self.book_execucao.abrirPosicao(dataEntrada, ativo, tipo, volume, precoEntrada, forcaRelativa, stopLoss, stopGain)
+
+    def getResultadoPosicoesAbertas(self, data):
+        return self.book_execucao.getResultadoPosicoesAbertas(data)
+    
+    def arredondar_casas_decimais(self, casas=2):
+        self.book_execucao.arredondar_casas_decimais(casas)
+        if (self.filtrar_operacao_curva_capital):
+            self.book_referencia.arredondar_casas_decimais(casas)
