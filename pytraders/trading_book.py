@@ -24,23 +24,23 @@ class TradingBook:
         self.operacoes = pd.DataFrame(columns=['data', 'ativo', 'tipo', 'direcao', 'volume', 'preco', 'custo'])
         # Dataframe de Resumo Diário (Curva de Capital consolidada)
         # Index será a Data (DatetimeIndex) para facilitar o resampling e upsert
-        self.resumo_diario = pd.DataFrame(columns=['saldo', 'capital', 'media_movel_5d'])
-        self.resumo_diario.index.name = 'data'
+        self.capital_diario = pd.DataFrame(columns=['saldo', 'capital', 'media_movel_5d'])
+        self.capital_diario.index.name = 'data'
 
     # Nova função privada para gerenciar a lógica de média móvel e dia único
-    def __atualizar_resumo_diario(self, data, saldo, capital):
+    def __atualizar_capital_diario(self, data, saldo, capital):
         # Normaliza para garantir que horas não dupliquem linhas (apenas a data importa para curva diária)
         data_normalizada = pd.to_datetime(data).normalize()
 
         # Atualiza ou Cria a linha para este dia (Upsert)
         # Usamos .loc para garantir que se houver 10 trades no dia, ficaremos com o valor do último (fechamento do dia)
-        self.resumo_diario.loc[data_normalizada, 'saldo'] = float(saldo)
-        self.resumo_diario.loc[data_normalizada, 'capital'] = float(capital)
+        self.capital_diario.loc[data_normalizada, 'saldo'] = float(saldo)
+        self.capital_diario.loc[data_normalizada, 'capital'] = float(capital)
 
         # Lógica da Média Móvel Simples de 5 períodos (SMA 5)
         # Pegamos as últimas 5 linhas da coluna capital.
         # Como acabamos de atualizar a linha atual (data_normalizada), ela já está incluída no tail(5)
-        window = self.resumo_diario['capital'].tail(5)
+        window = self.capital_diario['capital'].tail(5)
 
         if len(window) == 5:
             media_movel = window.mean()
@@ -49,7 +49,7 @@ class TradingBook:
             # Se quiser NaN estrito até ter 5 dias, use np.nan
             media_movel = np.nan
 
-        self.resumo_diario.loc[data_normalizada, 'media_movel_5d'] = media_movel
+        self.capital_diario.loc[data_normalizada, 'media_movel_5d'] = media_movel
 
     # Funções de controle da evolução do patrimônio
     def atualizarPatrimonio(self, data, operacao, valor):
@@ -80,13 +80,13 @@ class TradingBook:
         self.patrimonio = pd.concat([self.patrimonio, atualizacao.to_frame().T], ignore_index=True)
 
         # Alimenta o dataframe diário consolidado após o registro do evento
-        self.__atualizar_resumo_diario(data, saldoAtual, capitalAtual)
+        self.__atualizar_capital_diario(data, saldoAtual, capitalAtual)
 
     def curva_capital_acima_media_movel(self):
-        if self.resumo_diario.empty:
+        if self.capital_diario.empty:
             return True
         else:
-            ultima_linha = self.resumo_diario.iloc[-1]
+            ultima_linha = self.capital_diario.iloc[-1]
             capital_atual = ultima_linha['capital']
             media_movel_5d = ultima_linha['media_movel_5d']
             if pd.isna(media_movel_5d):
@@ -366,8 +366,8 @@ class TradingBook:
 
     def plotar_curva_capital_diario(self):
         plt.figure(figsize=(20,10))
-        plt.plot(self.resumo_diario.index, self.resumo_diario['capital'], label='Capital Diário')
-        plt.plot(self.resumo_diario.index, self.resumo_diario['media_movel_5d'], label='MM5 Capital', linestyle='--')
+        plt.plot(self.capital_diario.index, self.capital_diario['capital'], label='Capital Diário')
+        plt.plot(self.capital_diario.index, self.capital_diario['media_movel_5d'], label='MM5 Capital', linestyle='--')
         plt.xlabel("Data")
         plt.ylabel("Lucro")
         plt.legend()
