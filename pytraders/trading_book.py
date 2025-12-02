@@ -90,11 +90,11 @@ class TradingBook:
             return True
         else:
             ultima_linha = self.capital_diario.iloc[-1]
-            capital_atual = ultima_linha['capital']
+            saldo_atual = ultima_linha['saldo']
             media_movel_5d = ultima_linha['media_movel_5d']
             if pd.isna(media_movel_5d):
                 return True
-            return capital_atual >= media_movel_5d
+            return saldo_atual >= media_movel_5d
 
     def temSaldoLiquido(self, valor):
         liquidoAtual = self.patrimonio['liquido'].iloc[-1] if (self.patrimonio.liquido.size > 0) else 0
