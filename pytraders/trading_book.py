@@ -85,16 +85,35 @@ class TradingBook:
         # Alimenta o dataframe diário consolidado após o registro do evento
         self.__atualizar_capital_diario(data, saldoAtual, capitalAtual)
 
-    def curva_capital_acima_media_movel(self):
+    def curva_capital_acima_media_movel(self, data_ignorada=None):
+        """
+        Verifica se a curva de capital está acima da média móvel.
+        Permite ignorar uma data específica (ex: data atual em um backtest), 
+        olhando para o registro imediatamente anterior.
+        """
         if self.capital_diario.empty:
             return True
-        else:
-            ultima_linha = self.capital_diario.iloc[-1]
-            saldo_atual = ultima_linha['saldo']
-            media_movel_5d = ultima_linha['media_movel_5d']
-            if pd.isna(media_movel_5d):
+        # Normaliza a data recebida para garantir compatibilidade com o índice
+        dt_ignorada = pd.to_datetime(data_ignorada).normalize()
+        # Pega a data do último registro existente
+        ultimo_indice_df = self.capital_diario.index[-1]
+        # Define o índice padrão como o último (-1)
+        idx_alvo = -1
+        # Verifica se o último registro deve ser ignorado
+        if ultimo_indice_df == dt_ignorada:
+            # Se só existe uma linha e ela é a data ignorada, tratamos como sem dados (True)
+            if len(self.capital_diario) < 2:
                 return True
-            return saldo_atual >= media_movel_5d
+            # Caso contrário, olhamos para a penúltima linha
+            idx_alvo = -2
+        # Obtém a linha alvo
+        linha_alvo = self.capital_diario.iloc[idx_alvo]
+        saldo_atual = linha_alvo['saldo']
+        media_movel_5d = linha_alvo['media_movel_5d']
+        # Se a média móvel for NaN (início da série), permite a operação
+        if pd.isna(media_movel_5d):
+            return True
+        return saldo_atual >= media_movel_5d
 
     def temSaldoLiquido(self, valor):
         liquidoAtual = self.patrimonio['liquido'].iloc[-1] if (self.patrimonio.liquido.size > 0) else 0
