@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 class TradingBook:
-    def __init__(self, indice_b3, data_inicio, data_fim, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital=False, sma_curva_capital=5):
+    def __init__(self, indice_b3, data_inicio, data_fim, capital_inicial, diversificacao_maxima, reinvestir_lucros, taxa_custo_operacional, pregoes, filtrar_operacao_curva_capital=False, sma_curva_capital=5, slippage=0.0):
         self.indice_b3 = indice_b3
         self.data_inicio = data_inicio
         self.data_fim = data_fim
@@ -14,6 +14,7 @@ class TradingBook:
         self.pregoes = pregoes
         self.filtrar_operacao_curva_capital = filtrar_operacao_curva_capital
         self.sma_curva_capital = sma_curva_capital
+        self.slippage = slippage
 
         # Dataframe da evolução do patrimônio
         # liquido: valor em conta corrente disponível para compras
@@ -123,6 +124,10 @@ class TradingBook:
     def abrirPosicao(self, dataEntrada, ativo, tipo, volume, precoEntrada, forcaRelativa, stopLoss=np.nan, stopGain=np.nan):
         if (type(dataEntrada) == str):
             dataEntrada = datetime.strptime(dataEntrada, '%Y-%m-%d')
+        if tipo == 'BUY':
+            precoEntrada = precoEntrada + self.slippage
+        elif tipo == 'SELL':
+            precoEntrada = precoEntrada - self.slippage
 
         # Grava nova posição aberta
         novaPosicao = pd.Series({
@@ -163,14 +168,20 @@ class TradingBook:
 
         posicaoAberta = (self.posicoes['ativo'] == ativo) & self.posicoes['precoSaida'].isna()
         if (self.posicoes.loc[posicaoAberta, 'dataEntrada'].size == 1):
+            tipo_posicao_aberta = self.posicoes.loc[posicaoAberta, 'tipo'].values[0]
+            tipo_operacao_saida = 'SELL' if tipo_posicao_aberta == 'BUY' else 'BUY'
+            if tipo_operacao_saida == 'BUY':
+                precoSaida = precoSaida + self.slippage
+            elif tipo_operacao_saida == 'SELL':
+                precoSaida = precoSaida - self.slippage
+            
             # Atualiza a posição fechando-a
             self.posicoes.loc[posicaoAberta, 'dataSaida'] = dataSaida
             self.posicoes.loc[posicaoAberta, 'precoSaida'] = precoSaida
             precoEntrada = self.posicoes.loc[posicaoAberta, 'precoEntrada'].values[0]
             volume = self.posicoes.loc[posicaoAberta, 'volume'].values[0]
-            tipo = self.posicoes.loc[posicaoAberta, 'tipo'].values[0]
             custo_operacional = volume * precoSaida * self.taxa_custo_operacional
-            lucro = (precoSaida - precoEntrada) if tipo == "BUY" else (precoEntrada - precoSaida)
+            lucro = (precoSaida - precoEntrada) if tipo_posicao_aberta == "BUY" else (precoEntrada - precoSaida)
             resultado = lucro * volume
             self.posicoes.loc[posicaoAberta, 'resultado'] = round(resultado, 2)
             self.posicoes.loc[posicaoAberta, 'retorno'] = round(lucro / precoEntrada, 4)
@@ -178,7 +189,7 @@ class TradingBook:
             novaOperacao = pd.Series({
                 'data'    : dataSaida,
                 'ativo'   : ativo,
-                'tipo'    : 'SELL' if tipo == 'BUY' else 'BUY',
+                'tipo'    : tipo_operacao_saida,
                 'direcao' : 'OUT',
                 'volume'  : volume,
                 'preco'   : precoSaida,
@@ -186,7 +197,7 @@ class TradingBook:
             })
             self.operacoes = pd.concat([self.operacoes, novaOperacao.to_frame().T], ignore_index=True)
             # Atualiza patrimônio
-            if tipo == 'BUY':
+            if tipo_posicao_aberta == 'BUY':
                 self.atualizarPatrimonio(dataSaida, 'INC_LIQUIDO', (volume * precoSaida) - custo_operacional)
             #else:
             #self.atualizarPatrimonio(dataSaida, 'DEC_LIQUIDO', (volume * precoSaida) + custo_operacional)
