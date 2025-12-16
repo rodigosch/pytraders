@@ -339,6 +339,9 @@ class TradingBook:
         retornos_diarios = self.posicoes.groupby("dataEntrada").agg(total_retorno=("retorno", "sum")).reset_index()
         sharpe = self.__calcular_sharpe(retornos_diarios, 'total_retorno', taxa_livre_risco_aa, freq='diária')
 
+        # Cálculo das maiores sequências de vitórias e derrotas
+        longest_winning_streak, longest_losing_streak = self.get_longest_streak()
+
         # Apresentação dos resultados
         print('Ativos operados     :', self.indice_b3)
         print('Data início         :', self.data_inicio)
@@ -353,6 +356,7 @@ class TradingBook:
         print('Saldo atual         :', self.fmtMonetario(capitalInicial + lucroLiquidoFin))
         print('--------------------')
         print('Drawdown máximo pct.: %.2f %%' %drawdownMaxPercent)
+        print('Drawdown máximo fin.:', self.fmtMonetario(drawdownMaxFin))
         print('Fator de recuperação: %.2f' %fatorRecuperacao)
         print('--------------------')
         print('Taxa de acerto      : %.2f %%' %(taxaAcerto*100))
@@ -362,7 +366,8 @@ class TradingBook:
         print('--------------------')
         print('Total de operações  : %d' %totalOperacoes)
         print('Total de posições   : %d' %totalPosicoes)
-        print('Drawdown máximo fin.:', self.fmtMonetario(drawdownMaxFin))
+        print(f"Maior seq vitórias : {longest_winning_streak}")
+        print(f"Maior seq derrotas : {longest_losing_streak}")        
         print('--------------------')
         print('Lucro médio         :', self.fmtMonetario(lucroMedioFin), '(%.2f %%)' %(lucroMedioPerc * 100))
         print('Perda média         :', self.fmtMonetario(perdaMediaFin), '(%.2f %%)' %(perdaMediaPerc * 100))
@@ -379,7 +384,31 @@ class TradingBook:
         print(f"CAGR                : {rentabilidade_media['variacao'].mean() * 100:.2f}% {frequencia_rentabilidade}")
         #"Rentabilidade média anual: {:.2f}%".format(rentabilidade_media['variacao'].mean() * 100)
 
+    def get_longest_streak(self):
+        longest_winning_streak = 0
+        longest_losing_streak = 0
+        current_winning_streak = 0
+        current_losing_streak = 0
 
+        for retorno_value in self.posicoes['retorno']:
+            if retorno_value > 0:
+                current_winning_streak += 1
+                current_losing_streak = 0
+            elif retorno_value < 0:
+                current_losing_streak += 1
+                current_winning_streak = 0
+            else:
+                # Assuming a 0 return resets both streaks
+                current_winning_streak = 0
+                current_losing_streak = 0
+            
+            if current_winning_streak > longest_winning_streak:
+                longest_winning_streak = current_winning_streak
+            
+            if current_losing_streak > longest_losing_streak:
+                longest_losing_streak = current_losing_streak
+
+        return longest_winning_streak, longest_losing_streak
 
     def plotar_curva_capital(self, plot_saldo=True, plot_capital=True, plot_liquido=True):
         datas = self.patrimonio['data']
