@@ -94,19 +94,20 @@ class TradingBook:
         """
         if self.capital_diario.empty:
             return True
-        # Normaliza a data recebida para garantir compatibilidade com o índice
-        dt_ignorada = pd.to_datetime(data_ignorada).normalize()
         # Pega a data do último registro existente
         ultimo_indice_df = self.capital_diario.index[-1]
         # Define o índice padrão como o último (-1)
         idx_alvo = -1
-        # Verifica se o último registro deve ser ignorado
-        if ultimo_indice_df == dt_ignorada:
-            # Se só existe uma linha e ela é a data ignorada, tratamos como sem dados (True)
-            if len(self.capital_diario) < 2:
-                return True
-            # Caso contrário, olhamos para a penúltima linha
-            idx_alvo = -2
+        # Normaliza a data recebida para garantir compatibilidade com o índice
+        if (data_ignorada is not None):
+            dt_ignorada = pd.to_datetime(data_ignorada).normalize()
+            # Verifica se o último registro deve ser ignorado
+            if ultimo_indice_df == dt_ignorada:
+                # Se só existe uma linha e ela é a data ignorada, tratamos como sem dados (True)
+                if len(self.capital_diario) < 2:
+                    return True
+                # Caso contrário, olhamos para a penúltima linha
+                idx_alvo = -2
         # Obtém a linha alvo
         linha_alvo = self.capital_diario.iloc[idx_alvo]
         saldo_atual = linha_alvo['saldo']
